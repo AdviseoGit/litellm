@@ -34,6 +34,16 @@ model_list:
       model: "bedrock/us.amazon.nova-premier-v1:0"
       aws_region_name: "us-east-1"
 
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      model: gemini/gemini-2.5-pro
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: gemini-3.1-pro
+    litellm_params:
+      model: gemini/gemini-3.1-pro
+      api_key: os.environ/GEMINI_API_KEY
+
 # MCP Server Configuration
 mcp_servers:
   # Wikipedia MCP - reliable and works without external deps
