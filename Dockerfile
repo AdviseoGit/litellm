@@ -12,9 +12,11 @@ WORKDIR /app
 
 USER root
 
-# Install build dependencies. Upgrade first: the base image is pinned, but apk pulls current Wolfi packages
-# (python3.13 now needs GLIBC_2.44, newer than the pinned base's glibc)
-RUN apk upgrade --no-cache && apk add --no-cache bash gcc py3-pip python3 python3-dev openssl openssl-dev
+# Install build dependencies. Python pinned: Wolfi's python-3.13 3.13.16_git20261016-r1 needs GLIBC_2.44,
+# but Wolfi's newest glibc is 2.43 (2026-10-23), so math/pip fail to import. Unpin once Wolfi ships glibc 2.44.
+ARG PY_VER=3.13.16_git20261016-r0
+RUN apk add --no-cache bash gcc py3-pip openssl openssl-dev \
+    python-3.13=$PY_VER python-3.13-base=$PY_VER python-3.13-dev=$PY_VER python-3.13-base-dev=$PY_VER
 
 RUN python -m pip install build==1.4.2
 
@@ -49,8 +51,8 @@ FROM $LITELLM_RUNTIME_IMAGE AS runtime
 USER root
 
 # Install runtime dependencies (libsndfile needed for audio processing on ARM64)
-RUN apk upgrade --no-cache && \
-    apk add --no-cache bash openssl tzdata nodejs npm python3 py3-pip libsndfile && \
+ARG PY_VER=3.13.16_git20261016-r0
+RUN apk add --no-cache bash openssl tzdata nodejs npm py3-pip libsndfile python-3.13=$PY_VER python-3.13-base=$PY_VER && \
     npm install -g npm@11.12.1 tar@7.5.11 glob@11.1.0 @isaacs/brace-expansion@5.0.1 minimatch@10.2.4 diff@8.0.3 && \
     # SECURITY FIX: npm bundles tar, glob, and brace-expansion at multiple nested
     # levels inside its dependency tree. `npm install -g <pkg>` only creates a
