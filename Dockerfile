@@ -49,7 +49,8 @@ FROM $LITELLM_RUNTIME_IMAGE AS runtime
 USER root
 
 # Install runtime dependencies (libsndfile needed for audio processing on ARM64)
-RUN apk add --no-cache bash openssl tzdata nodejs npm python3 py3-pip libsndfile && \
+# openssl-3.6 + libssl3, not plain openssl: Wolfi's default is now OpenSSL 4.0, which Prisma's engines can't detect or load
+RUN apk add --no-cache bash openssl-3.6 libssl3 tzdata nodejs npm python3 py3-pip libsndfile && \
     npm install -g npm@11.12.1 tar@7.5.11 glob@11.1.0 @isaacs/brace-expansion@5.0.1 minimatch@10.2.4 diff@8.0.3 && \
     # SECURITY FIX: npm bundles tar, glob, and brace-expansion at multiple nested
     # levels inside its dependency tree. `npm install -g <pkg>` only creates a
