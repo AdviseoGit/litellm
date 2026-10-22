@@ -12,8 +12,9 @@ WORKDIR /app
 
 USER root
 
-# Install build dependencies
-RUN apk add --no-cache bash gcc py3-pip python3 python3-dev openssl openssl-dev
+# Install build dependencies. Upgrade first: the base image is pinned, but apk pulls current Wolfi packages
+# (python3.13 now needs GLIBC_2.44, newer than the pinned base's glibc)
+RUN apk upgrade --no-cache && apk add --no-cache bash gcc py3-pip python3 python3-dev openssl openssl-dev
 
 RUN python -m pip install build==1.4.2
 
@@ -48,7 +49,8 @@ FROM $LITELLM_RUNTIME_IMAGE AS runtime
 USER root
 
 # Install runtime dependencies (libsndfile needed for audio processing on ARM64)
-RUN apk add --no-cache bash openssl tzdata nodejs npm python3 py3-pip libsndfile && \
+RUN apk upgrade --no-cache && \
+    apk add --no-cache bash openssl tzdata nodejs npm python3 py3-pip libsndfile && \
     npm install -g npm@11.12.1 tar@7.5.11 glob@11.1.0 @isaacs/brace-expansion@5.0.1 minimatch@10.2.4 diff@8.0.3 && \
     # SECURITY FIX: npm bundles tar, glob, and brace-expansion at multiple nested
     # levels inside its dependency tree. `npm install -g <pkg>` only creates a
